@@ -6,7 +6,6 @@ Implemented by: Chau Cao
 I certify that the entirety of this implementation is my own work */
 
 import java.io.*;
-import java.lang.*;
 
 
 public class RErecognizer {
@@ -17,30 +16,32 @@ public class RErecognizer {
   static PushbackReader pbIn;
   static FileReader fileIn;
   static FileReader temp;
+  static BufferedReader currentLine;
   public static void main(String args[]) throws IOException {
     if (args.length < 1) throw new IllegalArgumentException("No Arguments");
-      try {
-        fileIn = new FileReader(args[0]);
-      }
-      catch (IOException e) {
-        System.out.println("The file " + args[0] + " could not be opened");
-      }
+
+      fileIn = new FileReader(args[0]);
       cout.printf("%nEchoing File: %s%n", args[0]);
       echoFile();
       fileIn = new FileReader(args[0]);
       pbIn = new PushbackReader(fileIn);
       temp = new FileReader(args[0]);
-      curr_char = -1;
+      currentLine = new BufferedReader(temp);
       fullScanner();
 
-      /*
-      fileIn = new FileReader(args[1]);
-      echoFile(fileIn);
-      fileIn = new FileReader(args[1]);
+
+
+      fileIn = new FileReader("inputFile2.txt");
+      cout.printf("%nEchoing File: inputFile2.txt%n");
+      echoFile();
+      fileIn = new FileReader("inputFile2.txt");
       pbIn = new PushbackReader(fileIn);
-      curr_type = getToken();
+      temp = new FileReader("inputFile2.txt");
+      currentLine = new BufferedReader(temp);
+      curr_line = currentLine.readLine();
+      getToken();
       recognize_re(0);
-      */
+
   }
 
   static void echoFile() {
@@ -137,26 +138,187 @@ public class RErecognizer {
   }
 
   static void fullScanner() throws IOException {
-    BufferedReader currentLine = new BufferedReader(temp);
-    String readInLine = "";
-    readInLine = currentLine.readLine();
-    while(readInLine != null) {
-      cout.println("Processing Expression: " + readInLine);
+    curr_line = "";
+    curr_line = currentLine.readLine();
+    while(curr_line != null) {
+      cout.println("Processing Expression: \"" + curr_line + "\"");
       while(curr_type != TokenType.EOL) {
         getToken();
-        if(curr_type == TokenType.LNEGSET) {
-          cout.printf("%s: %c%c%n", curr_type, curr_char, 94);
-        }
-        else if (curr_type == TokenType.EOL)
+        if(curr_type == TokenType.CHAR)
         {
-          cout.printf("%s %n%n", curr_type);
+          cout.printf("%s: %c %n", curr_type, curr_char);
+        }
+        else if(curr_type == TokenType.EOL) {
+          cout.printf("%s%n%n", curr_type);
         }
         else {
-          cout.printf("%s: %c  %n", curr_type, curr_char);
+          cout.printf("%s: %n", curr_type);
         }
       }
-      readInLine = currentLine.readLine();
+      curr_line = currentLine.readLine();
       curr_type = TokenType.CHAR;
+    }
+  }
+
+  static void match(TokenType ttype) throws IOException {
+    if(ttype == curr_type) {
+      getToken();
+    }
+    else {
+      cout.println("Match Error: " + ttype);
+      System.exit(1);
+    }
+  }
+
+  static void print_indentation(int level) {
+    for(int i = 0; i < level; i++) {
+      cout.print("    ");
+    }
+  }
+
+  static void recognize_re(int level) throws IOException {
+    if(level == 0) {
+      cout.printf("%nProcessing Expression: \"%s\"%n", curr_line);
+    }
+    print_indentation(level);
+    cout.println("RE");
+
+    recognize_simple_re(level + 1);
+
+    while (curr_type == TokenType.VERT) {
+      print_indentation(level + 1);
+      cout.printf("%c %s%n", curr_char, curr_type);
+      match(TokenType.VERT);
+      recognize_simple_re(level + 1);
+    }
+    if(curr_type == TokenType.EOL && level == 0) {
+      curr_line = currentLine.readLine();
+      if(curr_line != null) {
+        getToken();
+        recognize_re(0);
+      }
+    }
+  }
+
+  static void recognize_simple_re(int level) throws IOException {
+    print_indentation(level);
+    cout.println("S_RE");
+
+    recognize_basic_re(level + 1);
+
+    while (curr_type != TokenType.VERT && curr_type != TokenType.EOL && curr_type != TokenType.RPAREN) {
+      recognize_basic_re(level + 1);
+    }
+  }
+
+  static void recognize_basic_re(int level) throws IOException {
+    print_indentation(level);
+    cout.println("B_RE");
+
+    recognize_elementary_re(level + 1);
+
+    while (curr_type == TokenType.STAR || curr_type == TokenType.PLUS || curr_type == TokenType.QMARK) {
+      print_indentation(level + 1);
+      cout.printf("%c %s%n", curr_char, curr_type);
+      switch(curr_type) {
+        case STAR:
+          match(TokenType.STAR);
+          break;
+        case PLUS:
+          match(TokenType.PLUS);
+          break;
+        case QMARK:
+          match(TokenType.QMARK);
+          break;
+        default:
+          recognize_elementary_re(level + 1);
+      }
+    }
+  }
+
+  static void recognize_elementary_re(int level) throws IOException {
+    print_indentation(level);
+    cout.println("E_RE");
+    switch(curr_type) {
+      case LPAREN:
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char,  curr_type);
+        match(TokenType.LPAREN);
+        recognize_re(level + 1);
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char, curr_type);
+        match(TokenType.RPAREN);
+        break;
+      case PERIOD:
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char, curr_type);
+        match(TokenType.PERIOD);
+        break;
+      case LPOSSET:
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char, curr_type);
+        match(TokenType.LPOSSET);
+        recognize_sitems(level + 1);
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char, curr_type);
+        match(TokenType.RSET);
+        break;
+      case LNEGSET:
+        print_indentation(level + 1);
+        cout.printf("%c%c %s%n", curr_char, 94,  curr_type);
+        match(TokenType.LNEGSET);
+        recognize_sitems(level + 1);
+        print_indentation(level + 1);
+        cout.printf("%c %s%n", curr_char, curr_type);
+        match(TokenType.RSET);
+        break;
+      case CHAR:
+        recognize_char_or_meta(level + 1);
+        match(TokenType.CHAR);
+        break;
+      case BSLASH:
+        recognize_char_or_meta(level + 1);
+        break;
+      case RANGLE:
+        recognize_char_or_meta(level + 1);
+        match(TokenType.RANGLE);
+        break;
+      case LANGLE:
+        recognize_char_or_meta(level + 1);
+        match(TokenType.LANGLE);
+        break;
+    }
+  }
+  static void recognize_char_or_meta(int level) throws IOException {
+    print_indentation(level);
+    cout.println("CHAR_OR_META");
+    print_indentation(level + 1);
+    cout.printf("%s %c%n", curr_type, curr_char);
+    if(curr_type == TokenType.BSLASH) {
+      match(TokenType.BSLASH);
+      recognize_char_or_meta(level);
+      match(curr_type);
+    }
+  }
+
+  static void recognize_sitems(int level) throws IOException {
+    print_indentation(level);
+    cout.println("SITEMS");
+    while(curr_type != TokenType.RSET) {
+      recognize_char_or_meta(level + 1);
+      switch(curr_type) {
+        case CHAR:
+          match(TokenType.CHAR);
+          break;
+        case BSLASH:
+          break;
+        case RANGLE:
+          match(TokenType.RANGLE);
+          break;
+        case LANGLE:
+          match(TokenType.LANGLE);
+          break;
+      }
     }
   }
 }
