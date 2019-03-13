@@ -293,10 +293,11 @@ public class RErecognizer {
     print_indentation(level);
     cout.println("CHAR_OR_META");
     print_indentation(level + 1);
-    cout.printf("%s %c%n", curr_type, curr_char);
+    cout.printf("%c %s%n", curr_char, curr_type);
     if(curr_type == TokenType.BSLASH) {
       match(TokenType.BSLASH);
-      recognize_char_or_meta(level);
+      print_indentation(level + 1);
+      cout.printf("%c %s%n", curr_char, curr_type);
       match(curr_type);
     }
   }
