@@ -20,7 +20,7 @@ public class RErecognizer {
   public static void main(String args[]) throws IOException {
     if (args.length < 1) throw new IllegalArgumentException("No Arguments");
 
-      fileIn = new FileReader(args[0]);
+      /*fileIn = new FileReader(args[0]);
       cout.printf("%nEchoing File: %s%n", args[0]);
       echoFile();
       fileIn = new FileReader(args[0]);
@@ -32,7 +32,7 @@ public class RErecognizer {
 
 
       fileIn = new FileReader("inputFile2.txt");
-      cout.printf("%nEchoing File: inputFile2.txt%n");
+      cout.printf("Echoing File: inputFile2.txt%n");
       echoFile();
       fileIn = new FileReader("inputFile2.txt");
       pbIn = new PushbackReader(fileIn);
@@ -40,10 +40,15 @@ public class RErecognizer {
       currentLine = new BufferedReader(temp);
       curr_line = currentLine.readLine();
       getToken();
-      recognize_re(0);
+      recognize_re(0);*/
+      REparser parse = new REparser("inputFile2.txt");
 
   }
 
+  //void echofile()
+  //Function uses global variable fileIn and reads in the entire text file
+  //line by line and prints the text to the console.
+  //File closes upon completion
   static void echoFile() {
     BufferedReader echo = new BufferedReader(fileIn);
     String curr_char = "";
@@ -58,6 +63,9 @@ public class RErecognizer {
     }
   }
 
+  //void lookUp()
+  //Helper function to determine token type
+  //Part of Scanner functionality
   static void lookUp() throws IOException {
     switch (curr_char) {
       case 124:
@@ -124,12 +132,19 @@ public class RErecognizer {
     }
   }
 
+  //void getToken()
+  //Main component of scnnaer
+  //Reads in the next item from the file
+  //Calls lookUp() to determine the current tokens type and stores in global
+  //  variable curr_char
   static void getToken() throws IOException{
     curr_char = pbIn.read();
     getNonBlank();
     lookUp();
   }
 
+  //void getNonBlank()
+  //Skips whitespace in regex
   static void getNonBlank() throws IOException{
     while(curr_char == 32)
     {
@@ -137,6 +152,9 @@ public class RErecognizer {
     }
   }
 
+  //void fullScanner()
+  //Outputs each regex line from file and determins the identity and token type
+  //  of each item.
   static void fullScanner() throws IOException {
     curr_line = "";
     curr_line = currentLine.readLine();
@@ -160,6 +178,9 @@ public class RErecognizer {
     }
   }
 
+  //void match(TokenType ttype)
+  //Advancing component of the Regex Recognizer
+  //Communication between the Recognizer and Scanner happens in this function
   static void match(TokenType ttype) throws IOException {
     if(ttype == curr_type) {
       getToken();
@@ -169,6 +190,7 @@ public class RErecognizer {
       System.exit(1);
     }
   }
+
 
   static void print_indentation(int level) {
     for(int i = 0; i < level; i++) {
@@ -205,7 +227,6 @@ public class RErecognizer {
     cout.println("S_RE");
 
     recognize_basic_re(level + 1);
-
     while (curr_type != TokenType.VERT && curr_type != TokenType.EOL && curr_type != TokenType.RPAREN) {
       recognize_basic_re(level + 1);
     }
@@ -289,6 +310,7 @@ public class RErecognizer {
         break;
     }
   }
+
   static void recognize_char_or_meta(int level) throws IOException {
     print_indentation(level);
     cout.println("CHAR_OR_META");
