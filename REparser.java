@@ -26,7 +26,7 @@ public class REparser {
       currentLine = new BufferedReader(temp);
       curr_line = currentLine.readLine();
       getToken();
-      recognize_re(0);
+      parse_re(0);
   }
 
   //void echofile()
@@ -155,45 +155,45 @@ public class REparser {
     }
   }
 
-  static void recognize_re(int level) throws IOException {
+  static void parse_re(int level) throws IOException {
     if(level == 0) {
       cout.printf("%nProcessing Expression: \"%s\"%n", curr_line);
     }
-    print_indentation(level);
-    cout.println("RE");
-
-    recognize_simple_re(level + 1);
+    //print_indentation(level);
+    //cout.println("RE");
+    ConscellNode root = new ConscellNode(parse_simple_re(level + 1), "RE", level);
+    ConscellNode last
 
     while (curr_type == TokenType.VERT) {
-      print_indentation(level + 1);
-      cout.printf("%c %s%n", curr_char, curr_type);
+      //print_indentation(level + 1);
+      //cout.printf("%c %s%n", curr_char, curr_type);
       match(TokenType.VERT);
-      recognize_simple_re(level + 1);
+      parse_simple_re(level + 1);
     }
     if(curr_type == TokenType.EOL && level == 0) {
       curr_line = currentLine.readLine();
       if(curr_line != null) {
         getToken();
-        recognize_re(0);
+        parse_re(0);
       }
     }
   }
 
-  static void recognize_simple_re(int level) throws IOException {
+  static void parse_simple_re(int level) throws IOException {
     print_indentation(level);
     cout.println("S_RE");
 
-    recognize_basic_re(level + 1);
+    parse_basic_re(level + 1);
     while (curr_type != TokenType.VERT && curr_type != TokenType.EOL && curr_type != TokenType.RPAREN) {
-      recognize_basic_re(level + 1);
+      parse_basic_re(level + 1);
     }
   }
 
-  static void recognize_basic_re(int level) throws IOException {
+  static void parse_basic_re(int level) throws IOException {
     print_indentation(level);
     cout.println("B_RE");
 
-    recognize_elementary_re(level + 1);
+    parse_elementary_re(level + 1);
 
     while (curr_type == TokenType.STAR || curr_type == TokenType.PLUS || curr_type == TokenType.QMARK) {
       print_indentation(level + 1);
@@ -209,12 +209,12 @@ public class REparser {
           match(TokenType.QMARK);
           break;
         default:
-          recognize_elementary_re(level + 1);
+          parse_elementary_re(level + 1);
       }
     }
   }
 
-  static void recognize_elementary_re(int level) throws IOException {
+  static void parse_elementary_re(int level) throws IOException {
     print_indentation(level);
     cout.println("E_RE");
     switch(curr_type) {
@@ -222,7 +222,7 @@ public class REparser {
         print_indentation(level + 1);
         cout.printf("%c %s%n", curr_char,  curr_type);
         match(TokenType.LPAREN);
-        recognize_re(level + 1);
+        parse_re(level + 1);
         print_indentation(level + 1);
         cout.printf("%c %s%n", curr_char, curr_type);
         match(TokenType.RPAREN);
@@ -236,7 +236,7 @@ public class REparser {
         print_indentation(level + 1);
         cout.printf("%c %s%n", curr_char, curr_type);
         match(TokenType.LPOSSET);
-        recognize_sitems(level + 1);
+        parse_sitems(level + 1);
         print_indentation(level + 1);
         cout.printf("%c %s%n", curr_char, curr_type);
         match(TokenType.RSET);
@@ -245,30 +245,30 @@ public class REparser {
         print_indentation(level + 1);
         cout.printf("%c%c %s%n", curr_char, 94,  curr_type);
         match(TokenType.LNEGSET);
-        recognize_sitems(level + 1);
+        parse_sitems(level + 1);
         print_indentation(level + 1);
         cout.printf("%c %s%n", curr_char, curr_type);
         match(TokenType.RSET);
         break;
       case CHAR:
-        recognize_char_or_meta(level + 1);
+        parse_char_or_meta(level + 1);
         match(TokenType.CHAR);
         break;
       case BSLASH:
-        recognize_char_or_meta(level + 1);
+        parse_char_or_meta(level + 1);
         break;
       case RANGLE:
-        recognize_char_or_meta(level + 1);
+        parse_char_or_meta(level + 1);
         match(TokenType.RANGLE);
         break;
       case LANGLE:
-        recognize_char_or_meta(level + 1);
+        parse_char_or_meta(level + 1);
         match(TokenType.LANGLE);
         break;
     }
   }
 
-  static void recognize_char_or_meta(int level) throws IOException {
+  static void parse_char_or_meta(int level) throws IOException {
     print_indentation(level);
     cout.println("CHAR_OR_META");
     print_indentation(level + 1);
@@ -281,11 +281,11 @@ public class REparser {
     }
   }
 
-  static void recognize_sitems(int level) throws IOException {
+  static void parse_sitems(int level) throws IOException {
     print_indentation(level);
     cout.println("SITEMS");
     while(curr_type != TokenType.RSET) {
-      recognize_char_or_meta(level + 1);
+      parse_char_or_meta(level + 1);
       switch(curr_type) {
         case CHAR:
           match(TokenType.CHAR);
