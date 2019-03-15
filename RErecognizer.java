@@ -251,8 +251,6 @@ public class RErecognizer {
         case QMARK:
           match(TokenType.QMARK);
           break;
-        default:
-          recognize_elementary_re(level + 1);
       }
     }
   }

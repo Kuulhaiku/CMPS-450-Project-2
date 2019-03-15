@@ -7,4 +7,11 @@ public class AbstractNode {
   public int getLevel() {
     return level;
   }
+  public String toString() {
+    String indentation = "";
+    for(int i = 0; i < level; i++) {
+      indentation += "    ";
+    }
+    return indentation;
+  }
 }
