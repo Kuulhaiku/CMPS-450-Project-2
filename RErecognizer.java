@@ -7,6 +7,11 @@ I certify that the entirety of this implementation is my own work */
 
 import java.io.*;
 
+//The entirety of Project 4 is run from this file
+//The correct way to run this program is by running
+//  java RErecognizer inputFile1.txt
+//from the directory that contains all the .java files and the 2 inputFiles
+//from the specifications of the program after compilation
 public class RErecognizer {
   static PrintStream cout = System.out;
   static TokenType curr_type;
@@ -19,6 +24,7 @@ public class RErecognizer {
   public static void main(String args[]) throws IOException {
     if (args.length < 1) throw new IllegalArgumentException("No Arguments");
 
+      //The following code block carries out the specs of the first 10% of project 2
       fileIn = new FileReader(args[0]);
       cout.printf("%nEchoing File: %s%n", args[0]);
       echoFile();
@@ -28,6 +34,7 @@ public class RErecognizer {
       currentLine = new BufferedReader(temp);
       fullScanner();
 
+      //The following code block carries out the specs of the following 30% of project 2
       fileIn = new FileReader("inputFile2.txt");
       cout.printf("Echoing File: inputFile2.txt%n");
       echoFile();
@@ -39,7 +46,17 @@ public class RErecognizer {
       getToken();
       recognize_re(0);
 
+      //The foloowing statement carries out the next 30% of project 2
       REparser parse = new REparser("inputFile2.txt");
+
+      //The following statemente carries out the last 30% of project 2
+      //*************NOTE**************
+      //The output of the last REGEX read during part 4 is partially incorrect
+      //The K_plus operator is being interpreted as a right child of K_char
+      //intead of K_qmark and I could not figure out logically how to do the correct
+      //node filtering to have it returned as a right child of K_qmark instead of
+      //K_char
+      REabsparse absparse = new REabsparse("inputFile2.txt");
 
   }
 
@@ -189,13 +206,20 @@ public class RErecognizer {
     }
   }
 
-
+  //void print_indentation
+  //Prints out the passed in indentation level
   static void print_indentation(int level) {
     for(int i = 0; i < level; i++) {
       cout.print("    ");
     }
   }
 
+  //void recognize_re
+  //Carries out the first line of the EBNF grammar in the project specs
+  //Calls simple_re
+  //when that function returns checks if the token type is VERT and calls simple_re again
+  //until that token is not present.
+  //continues until EOF is reached
   static void recognize_re(int level) throws IOException {
     if(level == 0) {
       cout.printf("%nProcessing Expression: \"%s\"%n", curr_line);
@@ -220,6 +244,9 @@ public class RErecognizer {
     }
   }
 
+  //void recognize_simple_re
+  //Carries out the second line of the EBNF grammar
+  //Calls recognize_basic_re. Calls until VERT, EOL, or RPAREN are found
   static void recognize_simple_re(int level) throws IOException {
     print_indentation(level);
     cout.println("S_RE");
@@ -230,12 +257,14 @@ public class RErecognizer {
     }
   }
 
+  //void recognize_basic_re
+  //Carries out the 3rd line of the EBNF grammar.
+  //Calls recognize_elementary_re. Checks for STAR PLUS AND QMARK
   static void recognize_basic_re(int level) throws IOException {
     print_indentation(level);
     cout.println("B_RE");
 
     recognize_elementary_re(level + 1);
-
     while (curr_type == TokenType.STAR || curr_type == TokenType.PLUS || curr_type == TokenType.QMARK) {
       print_indentation(level + 1);
       cout.printf("%c %s%n", curr_char, curr_type);
@@ -253,6 +282,8 @@ public class RErecognizer {
     }
   }
 
+//void recognize_elementary_re
+//Carries out the 4th line of the EBNF grammar
   static void recognize_elementary_re(int level) throws IOException {
     print_indentation(level);
     cout.println("E_RE");
@@ -307,6 +338,8 @@ public class RErecognizer {
     }
   }
 
+  //void recognize_char_or_meta
+  //Carries out the 5th line of the EBNF Grammar
   static void recognize_char_or_meta(int level) throws IOException {
     print_indentation(level);
     cout.println("CHAR_OR_META");
@@ -320,6 +353,8 @@ public class RErecognizer {
     }
   }
 
+  //void recognize_sitems
+  //carries out the 6th line of the EBNF grammar in regards to handling set items.
   static void recognize_sitems(int level) throws IOException {
     print_indentation(level);
     cout.println("SITEMS");
