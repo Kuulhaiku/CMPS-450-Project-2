@@ -18,7 +18,7 @@ public class REparser {
   static BufferedReader currentLine;
   public REparser (String input) throws IOException {
     fileIn = new FileReader(input);
-    cout.printf("Echoing File: %s%n", input);
+    cout.printf("%nEchoing File: %s%n", input);
     echoFile();
     fileIn = new FileReader(input);
     pbIn = new PushbackReader(fileIn);

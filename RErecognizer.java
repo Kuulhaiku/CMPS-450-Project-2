@@ -7,7 +7,6 @@ I certify that the entirety of this implementation is my own work */
 
 import java.io.*;
 
-
 public class RErecognizer {
   static PrintStream cout = System.out;
   static TokenType curr_type;
@@ -20,7 +19,7 @@ public class RErecognizer {
   public static void main(String args[]) throws IOException {
     if (args.length < 1) throw new IllegalArgumentException("No Arguments");
 
-      /*fileIn = new FileReader(args[0]);
+      fileIn = new FileReader(args[0]);
       cout.printf("%nEchoing File: %s%n", args[0]);
       echoFile();
       fileIn = new FileReader(args[0]);
@@ -28,8 +27,6 @@ public class RErecognizer {
       temp = new FileReader(args[0]);
       currentLine = new BufferedReader(temp);
       fullScanner();
-
-
 
       fileIn = new FileReader("inputFile2.txt");
       cout.printf("Echoing File: inputFile2.txt%n");
@@ -40,7 +37,8 @@ public class RErecognizer {
       currentLine = new BufferedReader(temp);
       curr_line = currentLine.readLine();
       getToken();
-      recognize_re(0);*/
+      recognize_re(0);
+
       REparser parse = new REparser("inputFile2.txt");
 
   }
@@ -170,7 +168,7 @@ public class RErecognizer {
           cout.printf("%s%n%n", curr_type);
         }
         else {
-          cout.printf("%s: %n", curr_type);
+          cout.printf("%s %n", curr_type);
         }
       }
       curr_line = currentLine.readLine();
