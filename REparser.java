@@ -167,53 +167,31 @@ public class REparser {
     }
   }
 
-
-
   static ConscellNode parse_re(int level) throws IOException {
     if(level == 0) {
       cout.printf("%nProcessing Expression: \"%s\"%n", curr_line);
     }
-    //print_indentation(level);
-    //cout.println("RE");
     ConscellNode root = new ConscellNode(parse_simple_re(level + 1), "RE", level);
     ConscellNode last = root;
 
     while (curr_type == TokenType.VERT) {
-      //print_indentation(level + 1);
-      //cout.printf("%c %s%n", curr_char, curr_type);
       match(TokenType.VERT);
       last.setNext(new ConscellNode(parse_simple_re(level + 1), "VERT", level + 1));
       last = last.getNext();
     }
-    /*if(curr_type == TokenType.EOL && level == 0) {
-      curr_line = currentLine.readLine();
-      if(curr_line != null) {
-        getToken();
-        parse_re(0);
-      }
-    }*/
     return root;
   }
 
   static ConscellNode parse_simple_re(int level) throws IOException {
-    /*print_indentation(level);
-    cout.println("S_RE");*/
     ConscellNode root = new ConscellNode(parse_basic_re(level + 1), "S_RE", level);
-    //ConscellNode last = root;
-
     return root;
   }
 
   static ConscellNode parse_basic_re(int level) throws IOException {
-    /*print_indentation(level);
-    cout.println("B_RE");*/
     ConscellNode root = new ConscellNode(parse_elementary_re(level + 1), "B_RE", level);
     ConscellNode last = root;
-    //parse_elementary_re(level + 1);
 
     while (curr_type == TokenType.STAR || curr_type == TokenType.PLUS || curr_type == TokenType.QMARK) {
-      /*print_indentation(level + 1);
-      cout.printf("%c %s%n", curr_char, curr_type);*/
       last.setNext(new ConscellNode(Character.toString((char)curr_char) + " " + curr_type.toString(), level + 1));
       switch(curr_type) {
         case STAR:
@@ -236,17 +214,10 @@ public class REparser {
   }
 
   static ConscellNode parse_elementary_re(int level) throws IOException {
-    /*print_indentation(level);
-    cout.println("E_RE")*/
     ConscellNode root = new ConscellNode("E_RE", level);
     ConscellNode last;
     switch(curr_type) {
       case LPAREN:
-        /*print_indentation(level + 1);
-        cout.printf("%c %s%n", curr_char,  curr_type);*/
-        //parse_re(level + 1);
-        //print_indentation(level + 1);
-        //cout.printf("%c %s%n", curr_char, curr_type);
         last = new ConscellNode(Character.toString((char)curr_char) + " " + curr_type.toString(), level + 1);
         match(TokenType.LPAREN);
         last.setFirst(parse_re(level + 1));
@@ -255,21 +226,14 @@ public class REparser {
         match(TokenType.RPAREN);
         break;
       case PERIOD:
-        //print_indentation(level + 1);
-        //cout.printf("%c %s%n", curr_char, curr_type);
         root.setFirst(new ConscellNode(Character.toString((char)curr_char) + " " + curr_type.toString(), level + 1));
         match(TokenType.PERIOD);
         break;
       case LPOSSET:
-        //print_indentation(level + 1);
-        //cout.printf("%c %s%n", curr_char, curr_type);
         last = new ConscellNode(Character.toString((char)curr_char) + " " + curr_type.toString(), level + 1);
         match(TokenType.LPOSSET);
         last.setFirst(parse_sitems(level + 1));
         root.setFirst(last);
-        //parse_sitems(Level + 1);
-        //print_indentation(level + 1);
-        //cout.printf("%c %s%n", curr_char, curr_type);
         root.setNext(new ConscellNode(curr_type.toString(), level + 1));
         match(TokenType.RSET);
         break;
@@ -284,24 +248,20 @@ public class REparser {
       case CHAR:
         last = new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1);
         root.setFirst(last);
-        //parse_char_or_meta(level + 1);
         match(TokenType.CHAR);
         break;
       case BSLASH:
         last = new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1);
         root.setFirst(last);
-        //parse_char_or_meta(level + 1);
         break;
       case RANGLE:
         last = new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1);
         root.setFirst(last);
-        //parse_char_or_meta(level + 1);
         match(TokenType.RANGLE);
         break;
       case LANGLE:
         last = new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1);
         root.setFirst(last);
-        //parse_char_or_meta(level + 1);
         match(TokenType.LANGLE);
         break;
     }
@@ -309,8 +269,6 @@ public class REparser {
   }
 
   static AbstractNode parse_char_or_meta(int level) throws IOException {
-    //print_indentation(level);
-    //cout.println("CHAR_OR_META");
     if(curr_type == TokenType.BSLASH)
     {
       ConscellNode node = new ConscellNode(Character.toString((char)curr_char) + " " + curr_type.toString(), level + 1);
@@ -324,19 +282,9 @@ public class REparser {
       AtomicNode aNode = new AtomicNode(curr_char, curr_type, level + 1);
       return aNode;
     }
-    /*print_indentation(level + 1);
-    cout.printf("%c %s%n", curr_char, curr_type);
-    if(curr_type == TokenType.BSLASH) {
-      match(TokenType.BSLASH);
-      print_indentation(level + 1);
-      cout.printf("%c %s%n", curr_char, curr_type);
-      match(curr_type);
-    }*/
   }
 
   static AbstractNode parse_sitems(int level) throws IOException {
-    //print_indentation(level);
-    //cout.println("SITEMS");
     ConscellNode root = new ConscellNode("SITEMS", level);
     ConscellNode last = new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1);
     switch(curr_type) {
@@ -355,7 +303,6 @@ public class REparser {
     root.setFirst(last);
     while(curr_type != TokenType.RSET) {
       last.setNext(new ConscellNode(parse_char_or_meta(level + 1), "CHAR_OR_META", level + 1));
-      //parse_char_or_meta(level + 1);
       switch(curr_type) {
         case CHAR:
           match(TokenType.CHAR);
